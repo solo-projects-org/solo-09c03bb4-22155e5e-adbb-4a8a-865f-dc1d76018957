@@ -10,6 +10,7 @@
     --text: #e6edf3; --muted: #8fa3b8; --accent: #4da3ff;
     --green: #2ea043; --green-bg: #12261a; --red: #f85149; --red-bg: #2d1416;
     --amber: #d29922; --amber-bg: #2b2110; --gray-bg: #1c242e;
+    --blue-bg: #10233a;
   }
   * { box-sizing: border-box; }
   body {
@@ -17,12 +18,23 @@
     font: 14px/1.6 -apple-system, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
   }
   header {
-    padding: 20px 28px; border-bottom: 1px solid var(--line);
+    padding: 20px 28px 0; border-bottom: 1px solid var(--line);
     background: linear-gradient(180deg, #16202c, #101822);
   }
   header h1 { margin: 0 0 4px; font-size: 20px; }
-  header p { margin: 0; color: var(--muted); }
-  main { max-width: 1180px; margin: 0 auto; padding: 20px 28px 60px; }
+  header p { margin: 0 0 14px; color: var(--muted); }
+  nav.tabs { display: flex; gap: 6px; }
+  nav.tabs button.tab {
+    background: transparent; color: var(--muted); border: 1px solid transparent;
+    border-bottom: 0; border-radius: 8px 8px 0 0; padding: 9px 20px;
+    font-weight: 600; font-size: 14px;
+  }
+  nav.tabs button.tab.active {
+    background: var(--bg); color: var(--text); border-color: var(--line);
+  }
+  main { max-width: 1280px; margin: 0 auto; padding: 20px 28px 60px; }
+  .page { display: none; }
+  .page.active { display: block; }
   .card {
     background: var(--panel); border: 1px solid var(--line);
     border-radius: 10px; padding: 16px 18px; margin-bottom: 16px;
@@ -41,7 +53,7 @@
   details summary { cursor: pointer; color: var(--accent); }
   details code, .mono { font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: 12.5px; }
   table { border-collapse: collapse; width: 100%; margin-top: 8px; }
-  th, td { border: 1px solid var(--line); padding: 5px 9px; text-align: left; font-size: 13px; }
+  th, td { border: 1px solid var(--line); padding: 5px 9px; text-align: left; font-size: 13px; vertical-align: top; }
   th { background: var(--panel2); color: var(--muted); font-weight: 600; }
   td { font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: 12.5px; }
   .summary-chips { display: flex; flex-wrap: wrap; gap: 10px; margin: 16px 0; }
@@ -52,6 +64,7 @@
   .chip.green { color: #7ee2a0; border-color: var(--green); }
   .chip.red { color: #ff9d97; border-color: var(--red); }
   .chip.amber { color: #f0c36d; border-color: var(--amber); }
+  .chip.blue { color: #8cc4ff; border-color: var(--accent); }
   .tail-head { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
   .tail-head h2 { margin: 0; font-size: 17px; }
   .badge { padding: 3px 12px; border-radius: 999px; font-size: 12.5px; font-weight: 700; }
@@ -59,6 +72,9 @@
   .badge.no_solution { background: var(--red-bg); color: #ff9d97; border: 1px solid var(--red); }
   .badge.multiple { background: var(--amber-bg); color: #f0c36d; border: 1px solid var(--amber); }
   .badge.error { background: var(--red-bg); color: #ff9d97; border: 1px solid var(--red); }
+  .badge.auto { background: var(--green-bg); color: #7ee2a0; border: 1px solid var(--green); }
+  .badge.conflict { background: var(--red-bg); color: #ff9d97; border: 1px solid var(--red); }
+  .badge.unchanged { background: var(--gray-bg); color: var(--muted); border: 1px solid var(--line); }
   .note { color: var(--muted); font-size: 13px; }
   .conflict-box {
     background: var(--red-bg); border: 1px solid var(--red);
@@ -66,6 +82,10 @@
   }
   .warn-box {
     background: var(--amber-bg); border: 1px solid var(--amber);
+    border-radius: 8px; padding: 10px 14px; margin-top: 10px;
+  }
+  .ok-box {
+    background: var(--green-bg); border: 1px solid var(--green);
     border-radius: 8px; padding: 10px 14px; margin-top: 10px;
   }
   .error-box {
@@ -76,17 +96,47 @@
   .chosen { color: #7ee2a0; font-weight: 700; }
   .sol-block { margin-top: 10px; border: 1px dashed var(--line); border-radius: 8px; padding: 8px 12px; }
   .sol-block h4 { margin: 4px 0; color: var(--amber); }
-  #global-error { display: none; }
+  #global-error, #merge-global-error { display: none; }
   .spacer { flex: 1; }
   footer { color: var(--muted); text-align: center; padding: 24px; font-size: 12.5px; }
+
+  /* 合并页专用 */
+  .field-cell { min-width: 190px; }
+  .src-line { display: flex; justify-content: space-between; gap: 8px; padding: 1px 0; }
+  .src-line .src { color: var(--muted); flex: 0 0 38px; }
+  .src-line.ground .val { color: #8cc4ff; }
+  .src-line.airline .val { color: #f0c36d; }
+  .src-line.base .val { color: var(--muted); }
+  .src-line.same { background: var(--green-bg); border-radius: 4px; }
+  select.pick {
+    width: 100%; margin-top: 5px; background: var(--panel2); color: var(--text);
+    border: 1px solid var(--line); border-radius: 6px; padding: 4px 6px; font-size: 12.5px;
+  }
+  select.pick.conflict { border-color: var(--red); }
+  select.pick.auto { border-color: var(--green); }
+  tr.row-conflict td { background: rgba(248, 81, 73, .07); }
+  tr.row-changed td { background: rgba(77, 163, 255, .05); }
+  .file-slot { display: flex; flex-direction: column; gap: 4px; }
+  .file-slot label { font-weight: 600; font-size: 13px; }
+  .file-slot label small { color: var(--muted); font-weight: 400; }
+  .dirty-flag { color: var(--amber); font-weight: 700; display: none; }
+  .dirty-flag.show { display: inline; }
+  ul.blockers { margin: 6px 0; padding-left: 20px; }
+  ul.blockers li { margin: 3px 0; }
 </style>
 </head>
 <body>
 <header>
   <h1>🛫 航段时间清洗 · DST 安全入仓</h1>
-  <p>把地服导出的「当地时间」航段解析为唯一 UTC 航段链，避免夏令时切换时错误入仓。</p>
+  <p>把地服导出的「当地时间」航段解析为唯一 UTC 航段链，并支持地服 / 航司两份更正合并后再入仓。</p>
+  <nav class="tabs">
+    <button class="tab active" data-page="clean">① 清洗页</button>
+    <button class="tab" data-page="merge">② 更正合并</button>
+  </nav>
 </header>
 <main>
+  <!-- ================= 清洗页 ================= -->
+  <section class="page active" id="page-clean">
   <div class="card">
     <div class="upload-bar">
       <input type="file" id="fileInput" accept=".csv,text/csv">
@@ -118,16 +168,88 @@
 
   <div id="summary"></div>
   <div id="results"></div>
+  </section>
+
+  <!-- ================= 更正合并页 ================= -->
+  <section class="page" id="page-merge">
+  <div class="card">
+    <div class="upload-bar" style="align-items: flex-start;">
+      <div class="file-slot">
+        <label>底稿 <small>（原始航段底稿）</small></label>
+        <input type="file" id="mBase" accept=".csv,text/csv">
+        <span class="file-name" id="mBaseName">未选择</span>
+      </div>
+      <div class="file-slot">
+        <label>地服更正 CSV</label>
+        <input type="file" id="mGround" accept=".csv,text/csv">
+        <span class="file-name" id="mGroundName">未选择</span>
+      </div>
+      <div class="file-slot">
+        <label>航司值班员更正 CSV</label>
+        <input type="file" id="mAirline" accept=".csv,text/csv">
+        <span class="file-name" id="mAirlineName">未选择</span>
+      </div>
+      <button class="secondary" id="mSampleBtn">📦 一键载入合并样例（三份）</button>
+      <button id="mAnalyzeBtn" disabled>开始比对合并</button>
+    </div>
+    <details>
+      <summary>合并规则</summary>
+      <ul>
+        <li>三份文件沿用清洗表头，必须包含<b>同一组航段</b>，以 <code>tail_number + seq</code>（机尾号 + 航段序号）定位，定位键不能重复；</li>
+        <li>逐字段对照底稿：仅一方改动、或双方改成同一值 → <b>自动合并</b>；双方改成不同值 → <b>冲突</b>，由值班员从三份文件给出的值中选一个；</li>
+        <li>自动合并的值也可以改选，但任何选值都必须来自三份文件之一；</li>
+        <li>按当前合并稿对<b>任一方改过的机尾</b>重跑整链清洗；冲突全部选完、且这些机尾均为整链唯一解，才允许下载当地时间 CSV；</li>
+        <li>任何改选后须重新点「重新核对」，核对通过前下载按钮保持禁用。</li>
+      </ul>
+    </details>
+  </div>
+
+  <div class="card error-box" id="merge-global-error"></div>
+  <div id="merge-summary"></div>
+  <div id="merge-results"></div>
+
+  <div class="card" id="merge-action-card" style="display:none;">
+    <div class="upload-bar">
+      <button id="mVerifyBtn">🔍 重新核对（对改过的机尾重跑整链清洗）</button>
+      <span class="dirty-flag" id="mDirtyFlag">● 选值有改动，须重新核对后才能下载</span>
+      <span class="spacer"></span>
+      <button class="export" id="mDownloadBtn" disabled>⬇ 下载当地时间合并稿 CSV</button>
+    </div>
+    <div id="merge-verdict"></div>
+  </div>
+  </section>
 </main>
-<footer>仅整链唯一解的机尾允许入仓 · 重复时刻双候选求解 · 不存在时刻硬性报错</footer>
+<footer>仅整链唯一解的机尾允许入仓 · 冲突选值仅限三份文件给出的值 · 改选后须重新核对</footer>
 
 <script>
+// ===========================================================================
+// 通用工具
+// ===========================================================================
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g,
+  c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+document.querySelectorAll('nav.tabs button.tab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('nav.tabs button.tab').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    $('page-' + btn.dataset.page).classList.add('active');
+  });
+});
+
+function showError(elId, msg) {
+  const el = $(elId);
+  el.textContent = '⚠ ' + msg;
+  el.style.display = 'block';
+}
+function hideError(elId) { $(elId).style.display = 'none'; }
+
+// ===========================================================================
+// 清洗页（原有逻辑）
+// ===========================================================================
 let currentFile = null;
 let lastResult = null;
-
-const $ = (id) => document.getElementById(id);
-const esc = (s) => String(s).replace(/[&<>"']/g,
-  c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
 const STATUS_META = {
   unique:      {label: '唯一解 · 可导出',   cls: 'unique'},
@@ -152,7 +274,7 @@ $('sampleBtn').addEventListener('click', async () => {
 });
 
 $('solveBtn').addEventListener('click', async () => {
-  hideGlobalError();
+  hideError('global-error');
   $('results').innerHTML = '';
   $('summary').innerHTML = '';
   $('exportAllBtn').disabled = true;
@@ -162,24 +284,17 @@ $('solveBtn').addEventListener('click', async () => {
   try {
     const resp = await fetch('/api/solve', {method: 'POST', body: fd});
     const data = await resp.json();
-    if (!resp.ok) { showGlobalError(data.detail || '求解失败'); return; }
+    if (!resp.ok) { showError('global-error', data.detail || '求解失败'); return; }
     lastResult = data;
     render(data);
   } catch (err) {
-    showGlobalError('请求失败: ' + err);
+    showError('global-error', '请求失败: ' + err);
   } finally {
     $('solveBtn').disabled = false;
   }
 });
 
 $('exportAllBtn').addEventListener('click', () => doExport('__all__'));
-
-function showGlobalError(msg) {
-  const el = $('global-error');
-  el.textContent = '⚠ ' + msg;
-  el.style.display = 'block';
-}
-function hideGlobalError() { $('global-error').style.display = 'none'; }
 
 function render(data) {
   const s = data.summary;
@@ -314,6 +429,258 @@ async function doExport(tail) {
   a.click();
   URL.revokeObjectURL(a.href);
 }
+
+// ===========================================================================
+// 更正合并页
+// ===========================================================================
+const FIELD_LABELS = {
+  dep_local: '起飞当地', dep_tz: '起飞时区',
+  arr_local: '落地当地', arr_tz: '落地时区',
+  duration_min_minutes: '时长下限(分)', duration_max_minutes: '时长上限(分)',
+};
+const SIDE_LABELS_JS = {base: '底稿', ground: '地服', airline: '航司'};
+const STATUS_BADGE = {
+  unchanged: ['unchanged', '未改动'],
+  auto_ground: ['auto', '地服单方 · 自动合并'],
+  auto_airline: ['auto', '航司单方 · 自动合并'],
+  auto_agreed: ['auto', '双方一致 · 自动合并'],
+  conflict: ['conflict', '冲突 · 待选值'],
+};
+
+let mergeFiles = {base: null, ground: null, airline: null};
+let mergeAnalysis = null;
+let mergeDirty = false;
+let mergeVerified = false;
+
+function bindMergeSlot(key, inputId, nameId) {
+  $(inputId).addEventListener('change', (e) => {
+    mergeFiles[key] = e.target.files[0] || null;
+    $(nameId).textContent = mergeFiles[key] ? mergeFiles[key].name : '未选择';
+    $('mAnalyzeBtn').disabled =
+      !(mergeFiles.base && mergeFiles.ground && mergeFiles.airline);
+  });
+}
+bindMergeSlot('base', 'mBase', 'mBaseName');
+bindMergeSlot('ground', 'mGround', 'mGroundName');
+bindMergeSlot('airline', 'mAirline', 'mAirlineName');
+
+$('mSampleBtn').addEventListener('click', async () => {
+  hideError('merge-global-error');
+  try {
+    const names = {base: 'base_sheet.csv', ground: 'ground_correction.csv',
+                   airline: 'airline_correction.csv'};
+    for (const key of ['base', 'ground', 'airline']) {
+      const resp = await fetch('/api/merge/sample/' + key);
+      if (!resp.ok) throw new Error('样例下载失败: ' + key);
+      const blob = await resp.blob();
+      mergeFiles[key] = new File([blob], names[key], {type: 'text/csv'});
+    }
+    $('mBaseName').textContent = names.base;
+    $('mGroundName').textContent = names.ground;
+    $('mAirlineName').textContent = names.airline;
+    $('mAnalyzeBtn').disabled = false;
+  } catch (err) {
+    showError('merge-global-error', err.message);
+  }
+});
+
+$('mAnalyzeBtn').addEventListener('click', async () => {
+  hideError('merge-global-error');
+  $('merge-summary').innerHTML = '';
+  $('merge-results').innerHTML = '';
+  $('merge-verdict').innerHTML = '';
+  $('merge-action-card').style.display = 'none';
+  const fd = new FormData();
+  fd.append('base', mergeFiles.base);
+  fd.append('ground', mergeFiles.ground);
+  fd.append('airline', mergeFiles.airline);
+  $('mAnalyzeBtn').disabled = true;
+  try {
+    const resp = await fetch('/api/merge/analyze', {method: 'POST', body: fd});
+    const data = await resp.json();
+    if (!resp.ok) { showError('merge-global-error', data.detail || '比对失败'); return; }
+    mergeAnalysis = data;
+    mergeDirty = false;
+    mergeVerified = false;
+    renderMergeAnalysis(data);
+    $('merge-action-card').style.display = 'block';
+    setDirty(false);
+    $('mDownloadBtn').disabled = true;
+  } catch (err) {
+    showError('merge-global-error', '请求失败: ' + err);
+  } finally {
+    $('mAnalyzeBtn').disabled = false;
+  }
+});
+
+function setDirty(dirty) {
+  mergeDirty = dirty;
+  $('mDirtyFlag').classList.toggle('show', dirty);
+  if (dirty) {
+    mergeVerified = false;
+    $('mDownloadBtn').disabled = true;
+  }
+}
+
+function renderMergeAnalysis(data) {
+  const s = data.summary;
+  $('merge-summary').innerHTML = `<div class="summary-chips">
+    <span class="chip">航段 ${s.rows}</span>
+    <span class="chip blue">有改动航段 ${s.changed_rows}</span>
+    <span class="chip blue">改过机尾 ${s.changed_tail_count}</span>
+    <span class="chip red">冲突字段 ${s.conflict_cells}</span>
+  </div>
+  <p class="note">比对以 <code>tail_number + seq</code> 定位；下拉框默认值即自动合并结果，
+  冲突格（红框）必须从三份文件给出的值中选定一个；所有自动合并值均可改选。</p>`;
+
+  // 按机尾分组
+  const groups = new Map();
+  data.rows.forEach(r => {
+    if (!groups.has(r.tail)) groups.set(r.tail, []);
+    groups.get(r.tail).push(r);
+  });
+
+  $('merge-results').innerHTML = [...groups.entries()].map(([tail, rows]) => {
+    const hasConflict = rows.some(r => r.has_conflict);
+    const changed = rows.some(r => r.changed);
+    const badge = hasConflict
+      ? '<span class="badge conflict">含冲突 · 待选值</span>'
+      : changed ? '<span class="badge auto">改动可自动合并</span>'
+                : '<span class="badge unchanged">未改动</span>';
+    const head = `<div class="tail-head"><h2>✈ ${esc(tail)}</h2>${badge}</div>`;
+    const cols = data.columns.map(c =>
+      `<th>${esc(FIELD_LABELS[c] || c)}<br><span class="note mono">${esc(c)}</span></th>`).join('');
+    const body = rows.map(r => renderMergeRow(r)).join('');
+    return `<div class="card">${head}
+      <table><thead><tr><th>seq</th>${cols}</tr></thead>
+      <tbody>${body}</tbody></table></div>`;
+  }).join('');
+
+  document.querySelectorAll('select.pick').forEach(sel => {
+    sel.addEventListener('change', () => setDirty(true));
+  });
+}
+
+function renderMergeRow(r) {
+  const rowCls = r.has_conflict ? 'row-conflict' : (r.changed ? 'row-changed' : '');
+  const tds = r.cells ? mergeAnalysis.columns.map(col => {
+    const cell = r.cells[col];
+    return `<td class="field-cell">${renderCell(cell, r.tail, r.seq, col)}</td>`;
+  }).join('') : '';
+  return `<tr class="${rowCls}"><td>${r.seq}<br><span class="note">第 ${r.row} 行</span></td>${tds}</tr>`;
+}
+
+function renderCell(cell, tail, seq, col) {
+  const srcLines = ['base', 'ground', 'airline'].map(side => (
+    `<div class="src-line ${side}">
+      <span class="src">${SIDE_LABELS_JS[side]}</span>
+      <span class="val">${esc(cell[side]) || '&nbsp;'}</span></div>`
+  )).join('');
+
+  const options = cell.options.map(o => {
+    const label = o.value + '（' + o.sources.map(s => SIDE_LABELS_JS[s]).join('/') + '）';
+    const selected = cell.merged !== null && o.value === cell.merged ? ' selected' : '';
+    return `<option value="${esc(o.value)}"${selected}>${esc(label)}</option>`;
+  }).join('');
+  const [badgeCls, badgeText] = STATUS_BADGE[cell.status];
+  const selCls = cell.status === 'conflict' ? 'conflict'
+               : (cell.status === 'unchanged' ? '' : 'auto');
+  const selId = `sel|${tail}|${seq}|${col}`;
+  const blank = cell.status === 'conflict' && cell.merged === null
+    ? '<option value="" selected>— 请选择 —</option>' : '';
+  return `<div>${srcLines}
+    <span class="badge ${badgeCls}" style="margin:4px 0;display:inline-block;">${badgeText}</span>
+    <select class="pick ${selCls}" id="${esc(selId)}"
+      data-tail="${esc(tail)}" data-seq="${seq}" data-col="${esc(col)}">
+      ${blank}${options}
+    </select></div>`;
+}
+
+function collectResolutions() {
+  const res = {};
+  document.querySelectorAll('select.pick').forEach(sel => {
+    const {tail, seq, col} = sel.dataset;
+    const val = sel.value;
+    if (val === '') return;  // 未选的冲突留给后端拦截
+    res[tail] = res[tail] || {};
+    res[tail][seq] = res[tail][seq] || {};
+    res[tail][seq][col] = val;
+  });
+  return res;
+}
+
+$('mVerifyBtn').addEventListener('click', async () => {
+  hideError('merge-global-error');
+  const fd = new FormData();
+  fd.append('base', mergeFiles.base);
+  fd.append('ground', mergeFiles.ground);
+  fd.append('airline', mergeFiles.airline);
+  fd.append('resolutions', JSON.stringify(collectResolutions()));
+  $('mVerifyBtn').disabled = true;
+  try {
+    const resp = await fetch('/api/merge/verify', {method: 'POST', body: fd});
+    const data = await resp.json();
+    if (!resp.ok) { showError('merge-global-error', data.detail || '核对失败'); return; }
+    renderVerdict(data);
+    mergeVerified = data.download_allowed;
+    setDirty(false);
+    $('mDownloadBtn').disabled = !data.download_allowed;
+  } catch (err) {
+    showError('merge-global-error', '请求失败: ' + err);
+  } finally {
+    $('mVerifyBtn').disabled = false;
+  }
+});
+
+function renderVerdict(data) {
+  const tailRows = data.changed_tail_results.map(r => {
+    const meta = STATUS_META[r.status] || {label: r.status, cls: 'error'};
+    return `<tr><td>✈ ${esc(r.tail)}</td>
+      <td><span class="badge ${meta.cls}">${meta.label}</span></td>
+      <td>${r.reason ? esc(r.reason) : '整链唯一解，可入仓'}</td></tr>`;
+  }).join('');
+
+  let head;
+  if (data.download_allowed) {
+    head = `<div class="ok-box"><b>✅ 核对通过：</b>冲突已全部选定，
+      且 ${data.changed_tails.length} 个改过的机尾（${data.changed_tails.map(esc).join('、')}）
+      整链均为唯一解，可以下载当地时间合并稿 CSV。</div>`;
+  } else {
+    const items = data.blockers.map(b => `<li>${esc(b)}</li>`).join('');
+    head = `<div class="conflict-box"><b>⛔ 暂不能下载，原因如下：</b>
+      <ul class="blockers">${items}</ul>
+      <span class="note">调整选值后请再次点击「重新核对」。</span></div>`;
+  }
+  $('merge-verdict').innerHTML = `${head}
+    <h4 style="margin:14px 0 4px">改过机尾的整链清洗结果（按当前合并稿重跑）</h4>
+    <table><thead><tr><th>机尾</th><th>清洗状态</th><th>未通过原因 / 结论</th></tr></thead>
+    <tbody>${tailRows}</tbody></table>`;
+}
+
+$('mDownloadBtn').addEventListener('click', async () => {
+  if (mergeDirty || !mergeVerified) {
+    alert('⚠ 选值已变动，请先重新核对通过后再下载。');
+    return;
+  }
+  const fd = new FormData();
+  fd.append('base', mergeFiles.base);
+  fd.append('ground', mergeFiles.ground);
+  fd.append('airline', mergeFiles.airline);
+  fd.append('resolutions', JSON.stringify(collectResolutions()));
+  const resp = await fetch('/api/merge/export', {method: 'POST', body: fd});
+  if (!resp.ok) {
+    let msg = '下载被拒绝';
+    try { msg = (await resp.json()).detail || msg; } catch (e) {}
+    alert('⚠ ' + msg);
+    return;
+  }
+  const blob = await resp.blob();
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'merged_local_sheet.csv';
+  a.click();
+  URL.revokeObjectURL(a.href);
+});
 </script>
 </body>
 </html>

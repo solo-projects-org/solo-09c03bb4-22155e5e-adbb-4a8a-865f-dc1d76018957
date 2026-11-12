@@ -1,0 +1,7 @@
+tail_number,seq,dep_local,dep_tz,arr_local,arr_tz,duration_min_minutes,duration_max_minutes
+B-8001,1,2026-11-10 08:00,Asia/Shanghai,2026-11-10 11:00,Asia/Shanghai,150,210
+B-8001,2,2026-11-10 13:00,Asia/Shanghai,2026-11-10 15:00,Asia/Shanghai,90,150
+B-8001,3,2026-11-10 15:00,Asia/Shanghai,2026-11-10 20:00,Asia/Shanghai,120,360
+B-8002,1,2026-11-12 10:00,Asia/Tokyo,2026-11-12 12:00,Asia/Shanghai,150,240
+B-8003,1,2026-11-15 09:00,Asia/Shanghai,2026-11-15 12:30,Asia/Shanghai,150,210
+B-8003,2,2026-11-15 14:00,Asia/Shanghai,2026-11-15 16:00,Asia/Shanghai,90,150
