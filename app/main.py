@@ -1,15 +1,23 @@
-"""FastAPI 入口：航段时间清洗（DST 安全入仓）。"""
+"""FastAPI 入口：航段时间清洗（DST 安全入仓）与三向更正合并。"""
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.responses import FileResponse, Response
 
+from .merger import (
+    MergeChoiceError,
+    analyze_merge,
+    export_merged,
+    verify_merge,
+)
 from .solver import CsvFormatError, build_export_csv, solve_csv
 
 BASE_DIR = Path(__file__).resolve().parent
 SAMPLE_PATH = BASE_DIR.parent / "samples" / "dst_sample.csv"
+MERGE_SAMPLE_DIR = BASE_DIR.parent / "samples" / "merge"
 INDEX_PATH = BASE_DIR / "static" / "index.html"
 MAX_UPLOAD_BYTES = 10 * 1024 * 1024  # 10 MB
 
@@ -83,3 +91,101 @@ async def export(file: UploadFile = File(...), tail: str = Form(...)):
 @app.get("/api/health", include_in_schema=False)
 async def health():
     return {"status": "ok"}
+
+
+# ---------------------------------------------------------------------------
+# 三向合并：底稿 + 地服更正 + 航司值班员更正
+# ---------------------------------------------------------------------------
+
+_MERGE_SAMPLE_FILES = {
+    "base": "merge_base.csv",
+    "ground": "merge_ground.csv",
+    "airline": "merge_airline.csv",
+}
+
+
+@app.get("/api/merge/sample/{kind}", include_in_schema=False)
+async def merge_sample(kind: str):
+    """内置三向合并样例：kind ∈ base / ground / airline。"""
+    if kind not in _MERGE_SAMPLE_FILES:
+        raise HTTPException(404, f"未知样例类型 {kind!r}")
+    path = MERGE_SAMPLE_DIR / _MERGE_SAMPLE_FILES[kind]
+    return FileResponse(path, media_type="text/csv; charset=utf-8",
+                        filename=path.name)
+
+
+async def _read_three(base: UploadFile, ground: UploadFile, airline: UploadFile):
+    return (
+        await _read_csv_text(base),
+        await _read_csv_text(ground),
+        await _read_csv_text(airline),
+    )
+
+
+@app.post("/api/merge/analyze")
+async def merge_analyze(
+    base: UploadFile = File(...),
+    ground: UploadFile = File(...),
+    airline: UploadFile = File(...),
+):
+    """上传底稿与两份更正，返回逐字段三向比对结果（含冲突定位与可选值）。"""
+    texts = await _read_three(base, ground, airline)
+    try:
+        return analyze_merge(*texts)
+    except CsvFormatError as exc:
+        raise HTTPException(400, str(exc))
+
+
+@app.post("/api/merge/verify")
+async def merge_verify(
+    base: UploadFile = File(...),
+    ground: UploadFile = File(...),
+    airline: UploadFile = File(...),
+    choices: str = Form("[]"),
+):
+    """按值班员当前选值生成合并稿，对改过的机尾重跑整链清洗并给出未通过原因。"""
+    texts = await _read_three(base, ground, airline)
+    try:
+        choice_list = json.loads(choices)
+        if not isinstance(choice_list, list):
+            raise ValueError
+    except (json.JSONDecodeError, ValueError):
+        raise HTTPException(400, "choices 必须是 JSON 数组")
+    try:
+        analysis = analyze_merge(*texts)
+        return verify_merge(analysis, choice_list)
+    except CsvFormatError as exc:
+        raise HTTPException(400, str(exc))
+    except MergeChoiceError as exc:
+        raise HTTPException(400, str(exc))
+
+
+@app.post("/api/merge/export")
+async def merge_export(
+    base: UploadFile = File(...),
+    ground: UploadFile = File(...),
+    airline: UploadFile = File(...),
+    choices: str = Form("[]"),
+):
+    """下载合并后的当地时间 CSV；冲突未选完或机尾非唯一解时返回 409。"""
+    texts = await _read_three(base, ground, airline)
+    try:
+        choice_list = json.loads(choices)
+        if not isinstance(choice_list, list):
+            raise ValueError
+    except (json.JSONDecodeError, ValueError):
+        raise HTTPException(400, "choices 必须是 JSON 数组")
+    try:
+        analysis = analyze_merge(*texts)
+        csv_text, affected = export_merged(analysis, choice_list)
+    except CsvFormatError as exc:
+        raise HTTPException(400, str(exc))
+    except MergeChoiceError as exc:
+        raise HTTPException(409, str(exc))
+
+    filename = "merged_local.csv"
+    return Response(
+        content=csv_text,
+        media_type="text/csv; charset=utf-8",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )

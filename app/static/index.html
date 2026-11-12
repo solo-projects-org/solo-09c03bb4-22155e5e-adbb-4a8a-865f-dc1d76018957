@@ -10,6 +10,7 @@
     --text: #e6edf3; --muted: #8fa3b8; --accent: #4da3ff;
     --green: #2ea043; --green-bg: #12261a; --red: #f85149; --red-bg: #2d1416;
     --amber: #d29922; --amber-bg: #2b2110; --gray-bg: #1c242e;
+    --purple: #a371f7; --purple-bg: #221a33;
   }
   * { box-sizing: border-box; }
   body {
@@ -22,7 +23,7 @@
   }
   header h1 { margin: 0 0 4px; font-size: 20px; }
   header p { margin: 0; color: var(--muted); }
-  main { max-width: 1180px; margin: 0 auto; padding: 20px 28px 60px; }
+  main { max-width: 1280px; margin: 0 auto; padding: 20px 28px 60px; }
   .card {
     background: var(--panel); border: 1px solid var(--line);
     border-radius: 10px; padding: 16px 18px; margin-bottom: 16px;
@@ -36,12 +37,16 @@
   button:disabled { opacity: .45; cursor: not-allowed; }
   button.export { background: var(--green); color: #fff; padding: 5px 12px; font-size: 13px; }
   input[type=file] { color: var(--muted); }
-  .file-name { color: var(--muted); }
+  select {
+    background: var(--panel2); color: var(--text); border: 1px solid var(--line);
+    border-radius: 6px; padding: 4px 8px; font-size: 12.5px; max-width: 260px;
+  }
+  .file-name { color: var(--muted); font-size: 12.5px; }
   details { margin-top: 12px; color: var(--muted); }
   details summary { cursor: pointer; color: var(--accent); }
   details code, .mono { font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: 12.5px; }
   table { border-collapse: collapse; width: 100%; margin-top: 8px; }
-  th, td { border: 1px solid var(--line); padding: 5px 9px; text-align: left; font-size: 13px; }
+  th, td { border: 1px solid var(--line); padding: 5px 9px; text-align: left; font-size: 13px; vertical-align: top; }
   th { background: var(--panel2); color: var(--muted); font-weight: 600; }
   td { font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: 12.5px; }
   .summary-chips { display: flex; flex-wrap: wrap; gap: 10px; margin: 16px 0; }
@@ -52,6 +57,7 @@
   .chip.green { color: #7ee2a0; border-color: var(--green); }
   .chip.red { color: #ff9d97; border-color: var(--red); }
   .chip.amber { color: #f0c36d; border-color: var(--amber); }
+  .chip.purple { color: #d2b8ff; border-color: var(--purple); }
   .tail-head { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
   .tail-head h2 { margin: 0; font-size: 17px; }
   .badge { padding: 3px 12px; border-radius: 999px; font-size: 12.5px; font-weight: 700; }
@@ -59,6 +65,7 @@
   .badge.no_solution { background: var(--red-bg); color: #ff9d97; border: 1px solid var(--red); }
   .badge.multiple { background: var(--amber-bg); color: #f0c36d; border: 1px solid var(--amber); }
   .badge.error { background: var(--red-bg); color: #ff9d97; border: 1px solid var(--red); }
+  .badge.untouched { background: var(--gray-bg); color: var(--muted); border: 1px solid var(--line); }
   .note { color: var(--muted); font-size: 13px; }
   .conflict-box {
     background: var(--red-bg); border: 1px solid var(--red);
@@ -66,6 +73,10 @@
   }
   .warn-box {
     background: var(--amber-bg); border: 1px solid var(--amber);
+    border-radius: 8px; padding: 10px 14px; margin-top: 10px;
+  }
+  .ok-box {
+    background: var(--green-bg); border: 1px solid var(--green);
     border-radius: 8px; padding: 10px 14px; margin-top: 10px;
   }
   .error-box {
@@ -79,52 +90,135 @@
   #global-error { display: none; }
   .spacer { flex: 1; }
   footer { color: var(--muted); text-align: center; padding: 24px; font-size: 12.5px; }
+
+  /* 页签 */
+  .tabs { display: flex; gap: 8px; margin-bottom: 16px; }
+  .tab-btn {
+    background: var(--panel2); color: var(--muted); border: 1px solid var(--line);
+    border-radius: 999px; padding: 8px 22px; font-weight: 700;
+  }
+  .tab-btn.active { background: var(--accent); color: #06121f; border-color: var(--accent); }
+  .tab-pane { display: none; }
+  .tab-pane.active { display: block; }
+
+  /* 合并视图 */
+  .merge-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+  .merge-slot { border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; background: var(--panel2); }
+  .merge-slot h3 { margin: 0 0 8px; font-size: 14px; }
+  .merge-slot .file-name { display: block; margin-top: 6px; word-break: break-all; }
+  .cell-status { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 999px; white-space: nowrap; }
+  .cell-status.unchanged { background: var(--gray-bg); color: var(--muted); border: 1px solid var(--line); }
+  .cell-status.auto { background: var(--green-bg); color: #7ee2a0; border: 1px solid var(--green); }
+  .cell-status.conflict { background: var(--red-bg); color: #ff9d97; border: 1px solid var(--red); }
+  .src-val { display: block; padding: 2px 0; }
+  .src-val .src { color: var(--muted); display: inline-block; min-width: 44px; }
+  .src-val.is-chosen { color: #7ee2a0; font-weight: 700; }
+  .cell-pick { margin-top: 6px; width: 100%; }
+  .seg-title { color: var(--accent); font-weight: 700; margin: 14px 0 2px; font-family: ui-monospace, monospace; }
+  .field-label { color: var(--muted); font-size: 11.5px; margin-bottom: 4px; }
+  .verify-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 14px; }
 </style>
 </head>
 <body>
 <header>
   <h1>🛫 航段时间清洗 · DST 安全入仓</h1>
-  <p>把地服导出的「当地时间」航段解析为唯一 UTC 航段链，避免夏令时切换时错误入仓。</p>
+  <p>地服与航司值班员的更正三向合并，把「当地时间」航段解析为唯一 UTC 航段链，避免夏令时切换时错误入仓。</p>
 </header>
 <main>
-  <div class="card">
-    <div class="upload-bar">
-      <input type="file" id="fileInput" accept=".csv,text/csv">
-      <button class="secondary" id="sampleBtn">📦 载入内置夏令时样例</button>
-      <button id="solveBtn" disabled>开始清洗</button>
-      <span class="file-name" id="fileName">未选择文件</span>
-      <span class="spacer"></span>
-      <button class="export" id="exportAllBtn" disabled>⬇ 导出全部可导出机尾</button>
-    </div>
-    <details>
-      <summary>CSV 格式与求解规则</summary>
-      <p>必需表头（UTF-8 编码）：</p>
-      <p><code>tail_number,seq,dep_local,dep_tz,arr_local,arr_tz,duration_min_minutes,duration_max_minutes</code></p>
-      <ul>
-        <li><code>dep_local / arr_local</code>：当地时间，格式 <code>YYYY-MM-DD HH:MM</code>（不含时区偏移）；</li>
-        <li><code>dep_tz / arr_tz</code>：IANA 时区名，如 <code>Europe/Berlin</code>、<code>America/New_York</code>；</li>
-        <li><code>duration_*</code>：飞行时长下/上限（分钟，闭区间）；<code>seq</code> 为同一机尾内的航段顺序（整数，从 1 起）。</li>
-      </ul>
-      <ul>
-        <li>当地时间不存在（春季拨快空洞）→ 该行报错，整架机尾禁止导出；</li>
-        <li>当地时间重复（秋季拨回重叠）→ 保留两个 UTC 候选参与整链求解；</li>
-        <li>约束：飞行时长 ∈ [下限, 上限]，且下一段起飞不得早于上一段落地；</li>
-        <li>整链<b>唯一解</b>才允许导出该机尾的 UTC CSV；无解展示冲突航段，多解展示可行候选，均禁止导出。</li>
-      </ul>
-    </details>
+  <div class="tabs">
+    <button class="tab-btn active" id="tabClean">① 单文件清洗</button>
+    <button class="tab-btn" id="tabMerge">② 更正合并入仓</button>
   </div>
 
-  <div class="card error-box" id="global-error"></div>
+  <!-- ===================== 单文件清洗 ===================== -->
+  <section class="tab-pane active" id="paneClean">
+    <div class="card">
+      <div class="upload-bar">
+        <input type="file" id="fileInput" accept=".csv,text/csv">
+        <button class="secondary" id="sampleBtn">📦 载入内置夏令时样例</button>
+        <button id="solveBtn" disabled>开始清洗</button>
+        <span class="file-name" id="fileName">未选择文件</span>
+        <span class="spacer"></span>
+        <button class="export" id="exportAllBtn" disabled>⬇ 导出全部可导出机尾</button>
+      </div>
+      <details>
+        <summary>CSV 格式与求解规则</summary>
+        <p>必需表头（UTF-8 编码）：</p>
+        <p><code>tail_number,seq,dep_local,dep_tz,arr_local,arr_tz,duration_min_minutes,duration_max_minutes</code></p>
+        <ul>
+          <li><code>dep_local / arr_local</code>：当地时间，格式 <code>YYYY-MM-DD HH:MM</code>（不含时区偏移）；</li>
+          <li><code>dep_tz / arr_tz</code>：IANA 时区名，如 <code>Europe/Berlin</code>、<code>America/New_York</code>；</li>
+          <li><code>duration_*</code>：飞行时长下/上限（分钟，闭区间）；<code>seq</code> 为同一机尾内的航段顺序（整数，从 1 起）。</li>
+        </ul>
+        <ul>
+          <li>当地时间不存在（春季拨快空洞）→ 该行报错，整架机尾禁止导出；</li>
+          <li>当地时间重复（秋季拨回重叠）→ 保留两个 UTC 候选参与整链求解；</li>
+          <li>约束：飞行时长 ∈ [下限, 上限]，且下一段起飞不得早于上一段落地；</li>
+          <li>整链<b>唯一解</b>才允许导出该机尾的 UTC CSV；无解展示冲突航段，多解展示可行候选，均禁止导出。</li>
+        </ul>
+      </details>
+    </div>
 
-  <div id="summary"></div>
-  <div id="results"></div>
+    <div class="card error-box" id="global-error"></div>
+
+    <div id="summary"></div>
+    <div id="results"></div>
+  </section>
+
+  <!-- ===================== 三向合并 ===================== -->
+  <section class="tab-pane" id="paneMerge">
+    <div class="card">
+      <div class="merge-grid">
+        <div class="merge-slot">
+          <h3>① 航段底稿</h3>
+          <input type="file" id="baseInput" accept=".csv,text/csv">
+          <span class="file-name" id="baseName">未选择文件</span>
+        </div>
+        <div class="merge-slot">
+          <h3>② 地服更正 CSV</h3>
+          <input type="file" id="groundInput" accept=".csv,text/csv">
+          <span class="file-name" id="groundName">未选择文件</span>
+        </div>
+        <div class="merge-slot">
+          <h3>③ 航司值班员更正 CSV</h3>
+          <input type="file" id="airlineInput" accept=".csv,text/csv">
+          <span class="file-name" id="airlineName">未选择文件</span>
+        </div>
+      </div>
+      <div class="upload-bar" style="margin-top:14px">
+        <button class="secondary" id="mergeSampleBtn">📦 载入内置合并样例（三份）</button>
+        <button id="analyzeBtn" disabled>开始合并比对</button>
+        <span class="spacer"></span>
+      </div>
+      <details>
+        <summary>合并规则</summary>
+        <ul>
+          <li>三份文件沿用清洗表头，以 <code>tail_number + seq</code> 定位航段；每份文件内定位键不得重复，三份必须是同一组航段。</li>
+          <li>逐字段对照底稿：仅一方改动、或双方改成同一值 → <b>自动合并</b>（绿色）；双方改成不同值 → <b>冲突</b>（红色），由值班员从三份文件给出的值里三选一。</li>
+          <li>自动合并的值也可以改选；任何改选后必须重新点「重新核对」才能下载。</li>
+          <li>核对只对任一方改过的机尾重跑整链清洗；未通过的机尾及原因会列出。冲突全部选完、且这些机尾都有唯一解，才允许下载合并后的当地时间 CSV。</li>
+        </ul>
+      </details>
+    </div>
+
+    <div class="card error-box" id="merge-error"></div>
+
+    <div class="card" id="mergeSummaryCard" style="display:none">
+      <div class="summary-chips" id="mergeChips"></div>
+      <div class="verify-row">
+        <button id="verifyBtn">🔍 按当前合并稿重新核对</button>
+        <button class="export" id="mergeDownloadBtn" disabled>⬇ 下载合并稿（当地时间 CSV）</button>
+        <span class="note" id="verifyHint">尚未核对：完成选值后点击「重新核对」。</span>
+      </div>
+      <div id="verifyPanel"></div>
+    </div>
+
+    <div id="mergeResults"></div>
+  </section>
 </main>
-<footer>仅整链唯一解的机尾允许入仓 · 重复时刻双候选求解 · 不存在时刻硬性报错</footer>
+<footer>仅整链唯一解的机尾允许入仓 · 三向合并冲突人工定值 · 改选后强制重新核对</footer>
 
 <script>
-let currentFile = null;
-let lastResult = null;
-
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s).replace(/[&<>"']/g,
   c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -135,6 +229,47 @@ const STATUS_META = {
   multiple:    {label: '多解 · 禁止导出',   cls: 'multiple'},
   error:       {label: '数据错误 · 禁止导出', cls: 'error'},
 };
+
+const FIELD_LABELS = {
+  dep_local: '起飞当地时间', dep_tz: '起飞时区',
+  arr_local: '落地当地时间', arr_tz: '落地时区',
+  duration_min_minutes: '时长下限(分)', duration_max_minutes: '时长上限(分)',
+};
+const SOURCE_LABELS = {base: '底稿', ground: '地服', airline: '航司'};
+const CELL_META = {
+  unchanged: {label: '未改动', cls: 'unchanged'},
+  auto:      {label: '自动合并', cls: 'auto'},
+  conflict:  {label: '冲突 · 待选', cls: 'conflict'},
+};
+
+/* ---------------- 页签切换 ---------------- */
+$('tabClean').addEventListener('click', () => switchTab('Clean'));
+$('tabMerge').addEventListener('click', () => switchTab('Merge'));
+function switchTab(name) {
+  $('tabClean').classList.toggle('active', name === 'Clean');
+  $('tabMerge').classList.toggle('active', name === 'Merge');
+  $('paneClean').classList.toggle('active', name === 'Clean');
+  $('paneMerge').classList.toggle('active', name === 'Merge');
+}
+
+function showMergeError(msg) {
+  const el = $('merge-error');
+  el.textContent = '⚠ ' + msg;
+  el.style.display = 'block';
+}
+function hideMergeError() { $('merge-error').style.display = 'none'; }
+function showGlobalError(msg) {
+  const el = $('global-error');
+  el.textContent = '⚠ ' + msg;
+  el.style.display = 'block';
+}
+function hideGlobalError() { $('global-error').style.display = 'none'; }
+
+/* =====================================================================
+ * 一、单文件清洗（原流程）
+ * ===================================================================== */
+let currentFile = null;
+let lastResult = null;
 
 $('fileInput').addEventListener('change', (e) => {
   currentFile = e.target.files[0] || null;
@@ -164,7 +299,7 @@ $('solveBtn').addEventListener('click', async () => {
     const data = await resp.json();
     if (!resp.ok) { showGlobalError(data.detail || '求解失败'); return; }
     lastResult = data;
-    render(data);
+    renderClean(data);
   } catch (err) {
     showGlobalError('请求失败: ' + err);
   } finally {
@@ -174,14 +309,7 @@ $('solveBtn').addEventListener('click', async () => {
 
 $('exportAllBtn').addEventListener('click', () => doExport('__all__'));
 
-function showGlobalError(msg) {
-  const el = $('global-error');
-  el.textContent = '⚠ ' + msg;
-  el.style.display = 'block';
-}
-function hideGlobalError() { $('global-error').style.display = 'none'; }
-
-function render(data) {
+function renderClean(data) {
   const s = data.summary;
   $('summary').innerHTML = `<div class="summary-chips">
     <span class="chip">数据行 ${s.rows}</span>
@@ -305,12 +433,288 @@ async function doExport(tail) {
     alert('⚠ ' + msg);
     return;
   }
+  await downloadBlob(resp, 'utc_export.csv');
+}
+
+/* =====================================================================
+ * 二、三向合并
+ * ===================================================================== */
+const mergeFiles = {base: null, ground: null, airline: null};
+let mergeAnalysis = null;
+let verifyState = null;       // 最近一次核对结果
+let verifySignature = null;   // 核对时的选值签名；改选后失效
+
+function bindMergeInput(key, inputId, nameId) {
+  $(inputId).addEventListener('change', (e) => {
+    mergeFiles[key] = e.target.files[0] || null;
+    $(nameId).textContent = mergeFiles[key] ? mergeFiles[key].name : '未选择文件';
+    refreshAnalyzeBtn();
+  });
+}
+bindMergeInput('base', 'baseInput', 'baseName');
+bindMergeInput('ground', 'groundInput', 'groundName');
+bindMergeInput('airline', 'airlineInput', 'airlineName');
+
+function refreshAnalyzeBtn() {
+  $('analyzeBtn').disabled = !(mergeFiles.base && mergeFiles.ground && mergeFiles.airline);
+}
+
+$('mergeSampleBtn').addEventListener('click', async () => {
+  hideMergeError();
+  try {
+    for (const key of ['base', 'ground', 'airline']) {
+      const resp = await fetch(`/api/merge/sample/${key}`);
+      if (!resp.ok) throw new Error('样例载入失败');
+      const blob = await resp.blob();
+      const fname = key === 'base' ? 'merge_base.csv'
+        : key === 'ground' ? 'merge_ground.csv' : 'merge_airline.csv';
+      mergeFiles[key] = new File([blob], fname, {type: 'text/csv'});
+      $(key + 'Name').textContent = '已载入样例 ' + fname;
+    }
+    refreshAnalyzeBtn();
+  } catch (err) {
+    showMergeError('样例载入失败: ' + err);
+  }
+});
+
+$('analyzeBtn').addEventListener('click', async () => {
+  hideMergeError();
+  const fd = new FormData();
+  fd.append('base', mergeFiles.base);
+  fd.append('ground', mergeFiles.ground);
+  fd.append('airline', mergeFiles.airline);
+  $('analyzeBtn').disabled = true;
+  try {
+    const resp = await fetch('/api/merge/analyze', {method: 'POST', body: fd});
+    const data = await resp.json();
+    if (!resp.ok) { showMergeError(data.detail || '合并比对失败'); return; }
+    mergeAnalysis = data;
+    verifyState = null;
+    verifySignature = null;
+    renderMergeAnalysis(data);
+  } catch (err) {
+    showMergeError('请求失败: ' + err);
+  } finally {
+    $('analyzeBtn').disabled = false;
+  }
+});
+
+function currentChoices() {
+  if (!mergeAnalysis) return [];
+  const out = [];
+  for (const t of mergeAnalysis.tails) {
+    for (const seg of t.segments) {
+      for (const cell of seg.cells) {
+        if (cell.status === 'unchanged') continue;
+        out.push({tail: t.tail, seq: seg.seq, field: cell.field,
+                  source: cell.chosen_source});
+      }
+    }
+  }
+  return out;
+}
+
+function choiceSignature() {
+  return JSON.stringify(currentChoices());
+}
+
+function markDirty() {
+  verifySignature = null;
+  $('mergeDownloadBtn').disabled = true;
+  $('verifyHint').textContent = '选值已变更：必须重新核对后才能下载。';
+  $('verifyHint').style.color = 'var(--amber)';
+}
+
+function renderMergeAnalysis(data) {
+  const s = data.summary;
+  $('mergeSummaryCard').style.display = 'block';
+  $('mergeChips').innerHTML = `
+    <span class="chip">航段 ${s.rows}</span>
+    <span class="chip">机尾 ${s.total_tails}</span>
+    <span class="chip purple">被改过机尾 ${s.touched_tails}</span>
+    <span class="chip green">自动合并单元格 ${s.auto_cells}</span>
+    <span class="chip red">冲突单元格 ${s.conflict_cells}</span>`;
+  $('verifyPanel').innerHTML = '';
+  $('mergeDownloadBtn').disabled = true;
+  $('verifyHint').textContent = s.conflict_cells
+    ? `有 ${s.conflict_cells} 个冲突单元格待选，选完后点击「重新核对」。`
+    : '无冲突，点击「重新核对」验证整链。';
+  $('verifyHint').style.color = '';
+
+  $('mergeResults').innerHTML = data.tails.map(renderMergeTail).join('');
+  document.querySelectorAll('.cell-pick').forEach(sel => {
+    sel.addEventListener('change', onPickChange);
+  });
+}
+
+function onPickChange(ev) {
+  const sel = ev.target;
+  const {tail, seq, field} = sel.dataset;
+  const source = sel.value;
+  const t = mergeAnalysis.tails.find(x => x.tail === tail);
+  const seg = t.segments.find(x => String(x.seq) === String(seq));
+  const cell = seg.cells.find(x => x.field === field);
+  const opt = cell.options.find(o => o.source === source);
+  cell.chosen = opt.value;
+  cell.chosen_source = source;
+  // 更新三方值的高亮；冲突标记保留，核对时以后端重新分析为准
+  const box = sel.closest('td');
+  box.querySelectorAll('.src-val').forEach(div => {
+    div.classList.toggle('is-chosen', div.dataset.source === source);
+  });
+  const statusEl = box.querySelector('.cell-status');
+  if (cell.status === 'conflict') {
+    statusEl.textContent = '冲突 · 已定值';
+  }
+  markDirty();
+}
+
+function renderMergeTail(t) {
+  const badge = t.touched
+    ? '<span class="badge multiple">任一方改过 · 将重跑清洗</span>'
+    : '<span class="badge untouched">三方一致 · 不重跑</span>';
+  const headCells = ['seq', ...t.segments[0].cells
+      .map(c => FIELD_LABELS[c.field] || c.field)]
+    .map(h => `<th>${esc(h)}</th>`).join('');
+  const rows = t.segments.map(seg => {
+    const cells = seg.cells.map(cell => renderCell(cell, t.tail, seg.seq))
+      .join('</td><td>');
+    return `<tr><td>${seg.seq}</td><td>${cells}</td></tr>`;
+  }).join('');
+  return `<div class="card"><div class="tail-head">
+      <h2>✈ ${esc(t.tail)}</h2>${badge}
+    </div>
+    <table><thead><tr>${headCells}</tr></thead><tbody>${rows}</tbody></table></div>`;
+}
+
+function renderCell(cell, tail, seq) {
+  const meta = CELL_META[cell.status] || CELL_META.unchanged;
+  const srcDivs = cell.options.map(o => {
+    const isChosen = o.source === cell.chosen_source;
+    return `<span class="src-val ${isChosen ? 'is-chosen' : ''}" data-source="${o.source}">
+      <span class="src">${SOURCE_LABELS[o.source]}</span>${esc(o.value)}
+      ${isChosen ? ' ✔' : ''}
+    </span>`;
+  }).join('');
+  const options = cell.options.map(o =>
+    `<option value="${o.source}" ${o.source === cell.chosen_source ? 'selected' : ''}>
+      采用${SOURCE_LABELS[o.source]}值：${esc(o.value)}
+    </option>`).join('');
+  // 未改动单元格不允许改选（无任何更正）；其余均可改选
+  const picker = cell.status === 'unchanged' ? '' :
+    `<select class="cell-pick"
+       data-tail="${esc(tail)}" data-seq="${seq}" data-field="${esc(cell.field)}">
+       ${options}</select>`;
+  return `<div class="field-label">${esc(FIELD_LABELS[cell.field] || cell.field)}</div>
+    <span class="cell-status ${meta.cls}">${meta.label}</span>
+    <div style="margin-top:6px">${srcDivs}</div>${picker}`;
+}
+
+/* ---------------- 核对 ---------------- */
+$('verifyBtn').addEventListener('click', doVerify);
+
+async function doVerify() {
+  if (!mergeAnalysis) return;
+  hideMergeError();
+  const fd = new FormData();
+  fd.append('base', mergeFiles.base);
+  fd.append('ground', mergeFiles.ground);
+  fd.append('airline', mergeFiles.airline);
+  fd.append('choices', JSON.stringify(currentChoices()));
+  $('verifyBtn').disabled = true;
+  try {
+    const resp = await fetch('/api/merge/verify', {method: 'POST', body: fd});
+    const data = await resp.json();
+    if (!resp.ok) { showMergeError(data.detail || '核对失败'); return; }
+    verifyState = data;
+    verifySignature = choiceSignature();
+    renderVerify(data);
+  } catch (err) {
+    showMergeError('请求失败: ' + err);
+  } finally {
+    $('verifyBtn').disabled = false;
+  }
+}
+
+function renderVerify(data) {
+  const panel = $('verifyPanel');
+  let html = '';
+  if (data.unresolved_conflicts.length) {
+    const items = data.unresolved_conflicts.map(c =>
+      `<li>机尾 ${esc(c.tail)} · seq=${c.seq} · ${esc(FIELD_LABELS[c.field] || c.field)}</li>`
+    ).join('');
+    html += `<div class="conflict-box"><b>⛔ 还有 ${data.unresolved_conflicts.length} 个冲突未选值：</b>
+      <ul style="margin:6px 0">${items}</ul></div>`;
+  } else {
+    html += `<div class="ok-box"><b>✔ 冲突已全部选完。</b></div>`;
+  }
+
+  if (!data.unresolved_conflicts.length) {
+    const failed = data.checks.filter(c => !c.unique);
+    if (!failed.length) {
+      html += `<div class="ok-box" style="margin-top:10px">
+        <b>✔ 被改过的 ${data.affected_tails.length} 个机尾重跑整链清洗，全部唯一解，允许下载合并稿。</b>
+      </div>`;
+    } else {
+      const blocks = failed.map(c => `
+        <div class="conflict-box" style="margin-top:8px">
+          <b>✈ ${esc(c.tail)}：${esc(STATUS_META[c.status]?.label || c.status)}</b>
+          <ul style="margin:6px 0">${c.reasons.map(r => `<li>${esc(r)}</li>`).join('')}</ul>
+        </div>`).join('');
+      html += `<div style="margin-top:10px"><b>以下机尾未通过整链清洗（${failed.length} 个）：</b>${blocks}</div>`;
+    }
+    // 全部机尾状态一览
+    const rows = data.checks.map(c => `
+      <tr>
+        <td>${esc(c.tail)}</td>
+        <td><span class="badge ${c.unique ? 'unique' : c.status}">
+          ${c.unique ? '唯一解 · 通过' : esc(STATUS_META[c.status]?.label || c.status)}</span></td>
+        <td>${c.reasons.length ? esc(c.reasons.join('；')) : '—'}</td>
+      </tr>`).join('');
+    html += `<table style="margin-top:12px"><thead><tr>
+      <th>机尾</th><th>核对结果</th><th>未通过原因</th></tr></thead>
+      <tbody>${rows}</tbody></table>`;
+  }
+
+  panel.innerHTML = html;
+  const allowed = data.download_allowed && verifySignature === choiceSignature();
+  $('mergeDownloadBtn').disabled = !allowed;
+  $('verifyHint').textContent = data.download_allowed
+    ? '核对通过，可下载合并稿。任何改选后需重新核对。'
+    : '核对未通过，暂不能下载（见上方原因）。';
+  $('verifyHint').style.color = data.download_allowed ? 'var(--green)' : 'var(--red)';
+}
+
+/* ---------------- 下载 ---------------- */
+$('mergeDownloadBtn').addEventListener('click', async () => {
+  if (!mergeAnalysis) return;
+  // 前端兜底：改选后未重新核对则拦截
+  if (verifySignature !== choiceSignature()) {
+    alert('⚠ 选值在上次核对后发生过变更，请先点击「重新核对」。');
+    return;
+  }
+  const fd = new FormData();
+  fd.append('base', mergeFiles.base);
+  fd.append('ground', mergeFiles.ground);
+  fd.append('airline', mergeFiles.airline);
+  fd.append('choices', JSON.stringify(currentChoices()));
+  const resp = await fetch('/api/merge/export', {method: 'POST', body: fd});
+  if (!resp.ok) {
+    let msg = '下载被拒绝';
+    try { msg = (await resp.json()).detail || msg; } catch (e) {}
+    alert('⚠ ' + msg);
+    return;
+  }
+  await downloadBlob(resp, 'merged_local.csv');
+});
+
+async function downloadBlob(resp, fallbackName) {
   const blob = await resp.blob();
   const dispo = resp.headers.get('Content-Disposition') || '';
   const m = dispo.match(/filename="?([^";]+)"?/);
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = m ? m[1] : 'utc_export.csv';
+  a.download = m ? m[1] : fallbackName;
   a.click();
   URL.revokeObjectURL(a.href);
 }

@@ -1,0 +1,7 @@
+tail_number,seq,dep_local,dep_tz,arr_local,arr_tz,duration_min_minutes,duration_max_minutes
+B-8001,1,2026-06-10 10:00,Asia/Shanghai,2026-06-10 14:00,Asia/Dubai,420,540
+B-8001,2,2026-06-10 14:30,Asia/Dubai,2026-06-11 02:00,Asia/Shanghai,390,540
+B-8002,1,2026-06-12 08:00,Asia/Shanghai,2026-06-12 12:30,Asia/Singapore,200,300
+B-8003,1,2026-06-15 09:00,Asia/Shanghai,2026-06-15 14:30,Asia/Bangkok,360,450
+B-8003,2,2026-06-15 17:30,Asia/Bangkok,2026-06-15 20:30,Asia/Singapore,120,210
+B-8004,1,2026-06-20 07:30,Asia/Shanghai,2026-06-20 10:30,Asia/Tokyo,90,150
